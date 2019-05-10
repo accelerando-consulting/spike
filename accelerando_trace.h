@@ -9,7 +9,7 @@
 #define DBG Serial
 #endif
 #ifndef DEBUG_LEVEL
-#define DEBUG_LEVEL L_ALERT
+#define DEBUG_LEVEL L_INFO
 #endif
 
 
@@ -63,7 +63,7 @@ void _udpsend(char *dst, unsigned int port, char *buf, unsigned int len)
 
 
 #define SYSLOG(l,...)  \
-  if (SYSLOG_flag) {			\
+  if (SYSLOG_flag && (SYSLOG_host != "")) {	\
     char syslogbuf[512]; \
     int facility = 1; \
     int severity; \

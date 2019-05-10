@@ -21,23 +21,25 @@
 #include <time.h>
 #include <DHTesp.h>
 
+#define SYSLOG_flag wifiConnected
+#define SYSLOG_host syslog_server
+
 #include "accelerando_trace.h"
 
 //@******************************* constants *********************************
-// you can override these by defining them in config.h
 
-#ifndef HEARTBEAT_INTERVAL_SECONDS
-#define HEARTBEAT_INTERVAL_SECONDS (5*60)
-#endif
-
-#ifndef NETWORK_RECONNECT_SECONDS 
-#define NETWORK_RECONNECT_SECONDS 5
-#endif
+#define SETTINGS_RESET false
 
 #define PIN_HELLO 22
-#define PIN_BATTERY 36
-#define PIN_SOIL 26
-#define PIN_RAIN 18
+/*
+#define PIN_BATTERY 2
+#define PIN_SOIL 36
+#define PIN_RAIN 14
+*/
+#define PIN_BATTERY 34
+#define PIN_SOIL 33
+#define PIN_RAIN 35
+
 #define PIN_TEMP 16
 #define PIN_CLEAR 5
 
@@ -47,7 +49,15 @@
 #define BLYNK_TEMP 3
 #define BLYNK_HUM  4
 
-#define SLEEP_INTERVAL 15
+#ifdef ESP8266
+#define CONFIG_FILE "config.json"
+#else
+#define CONFIG_FILE "/config.json"
+#endif
+
+#ifndef NETWORK_RECONNECT_SECONDS 
+#define NETWORK_RECONNECT_SECONDS 5
+#endif
 
 //@******************************* variables *********************************
 
@@ -55,7 +65,9 @@
 // Configuration values
 //
 char blynk_auth[80] = "";
-char device_id[16] = "";
+char device_id[20] = "";
+char sample_interval[10] = "60";
+char syslog_server[40] = "";
 char ota_password[20] = "changeme";
 
 // 
@@ -74,9 +86,13 @@ Ticker wifiReconnectTimer;
 int blink_rate = 100;
 int blink_duty = 50;
 char ip_addr_str[20] = "unset";
-char reformat[8] = "yes";
+char reformat[8] = "no";
 
 DHTesp dht;
+
+int battRaw;
+int rainRaw;
+int soilRaw;
 
 
 //
@@ -109,25 +125,46 @@ void loop(void)
   //
   // Poll input devices
   //
-  int batt_raw = analogRead(PIN_BATTERY);
-  Blynk.virtualWrite(BLYNK_BATTERY, batt_raw);
+  //
+  // NOTE: ADC2 cannot be used when wifi is in use, so values are read from
+  // setup() prior to wifi turn on.   Pins 32 and up  use ADC1 so can be
+  // read here.
+  //
+  if (PIN_BATTERY>=32) {
+    battRaw = analogRead(PIN_BATTERY);
+  }
+  float voltage = (battRaw/4095.0) * 3.3f * 2.0f;
+  Blynk.virtualWrite(BLYNK_BATTERY, voltage);
 
-  int soil_raw = analogRead(PIN_SOIL);
-  Blynk.virtualWrite(BLYNK_SOIL, soil_raw);
+  if (PIN_SOIL >= 32) {
+    soilRaw = analogRead(PIN_SOIL);
+  }
+  float soil = ((4095-soilRaw)/4095.0)*100.0f;
+  Blynk.virtualWrite(BLYNK_SOIL, soil);
 
-  bool rain = digitalRead(PIN_RAIN);
+  if (PIN_RAIN >= 32) {
+    rainRaw = analogRead(PIN_RAIN);
+  }
+  float rain = (rainRaw/4095.0) * 100.0f;
   Blynk.virtualWrite(BLYNK_RAIN, rain);
 
   float temp = dht.getTemperature();
   Blynk.virtualWrite(BLYNK_TEMP, temp);
-
+  
   float hum = dht.getHumidity();
   Blynk.virtualWrite(BLYNK_HUM, hum);
 
-  delay(1000);
+  NOTICE("battRaw=%d soilRaw=%d rainRaw=%d", battRaw, soilRaw, rainRaw);
+  Blynk.run();
 
-  esp_sleep_enable_timer_wakeup(SLEEP_INTERVAL * 1000 * 1000);
-  Serial.flush(); 
+  NOTICE("SENSORS: batt=%.2fv soil=%.2f%% rain=%.2f%% temp=%.1fC hum=%.1f%%",
+	 voltage, soil, rain, temp, hum);
+
+  int sleep_secs = atoi(sample_interval);
+  if (sleep_secs < 1) sleep_secs = 60;
+  NOTICE("Going to sleep for %d sec", sleep_secs);
+  esp_sleep_enable_timer_wakeup(sleep_secs * 1000 * 1000);
+  Serial.flush();
   esp_deep_sleep_start();
 }
 
@@ -146,18 +183,25 @@ void setup(void)
   // 
   // Set up the IO devices
   //
+  NOTICE("IO Setup");
   pinMode(PIN_HELLO, OUTPUT);
   pinMode(PIN_BATTERY, INPUT);
   pinMode(PIN_SOIL, INPUT);
-  pinMode(PIN_RAIN, INPUT_PULLUP);
+  pinMode(PIN_RAIN, INPUT);
+
   dht.setup(PIN_TEMP, DHTesp::DHT11);
 
+  // We have to read the sensors BEFORE enabling wifi because wifi disables ADC2
+  battRaw = analogRead(PIN_BATTERY);
+  soilRaw = analogRead(PIN_SOIL);
+  rainRaw = analogRead(PIN_RAIN);
   
   // 
   // Set up the WiFi connection and Blynk client
   // 
   wifi_setup();
 
+  DEBUG("Blynk setup authkey=[%s]", blynk_auth);
   // Don't call blynk.begin here because we already set up the wifi
   Blynk.config(blynk_auth, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
   while(Blynk.connect() != true) {
@@ -166,8 +210,7 @@ void setup(void)
   }
 
 
-  ALERT("Setup complete");
-  //ESP.wdtEnable(WDTO_4S);
+  DEBUG("Setup complete");
 }
 
 //
@@ -216,14 +259,14 @@ void _readConfig()
   }
 
   NOTICE("mounted file system");
-  if (!SPIFFS.exists("config.json")) {
+  if (!SPIFFS.exists(CONFIG_FILE)) {
     ALERT("No configuration file found");
     //_writeConfig(false);
   }
 
   //file exists, reading and loading
   NOTICE("reading config file");
-  File configFile = SPIFFS.open("config.json", "r");
+  File configFile = SPIFFS.open(CONFIG_FILE, "r");
   if (!configFile) {
     ALERT("Cannot read config file");
     return;
@@ -248,6 +291,8 @@ void _readConfig()
   }
 
   strlcpy(blynk_auth, root["blynk_auth"]|"", sizeof(blynk_auth));
+  strlcpy(syslog_server, root["syslog_server"]|"", sizeof(syslog_server));
+  strlcpy(sample_interval, root["sample_interval"]|"", sizeof(sample_interval));
   strlcpy(device_id, root["device_id"]|"", sizeof(device_id));
   strlcpy(ota_password, root["ota_password"]|"changeme", sizeof(ota_password));
 
@@ -275,14 +320,7 @@ void _writeConfig(bool force_format)
     return;
   }
 
-#if 0
-  if (!SPIFFS.rename("config.json","config.bak")) {
-    ALERT("Unable to create backup config file");
-    return;
-  }
-#endif
-
-  File configFile = SPIFFS.open("config.json", "w");
+  File configFile = SPIFFS.open(CONFIG_FILE, "w");
   if (!configFile) {
     ALERT("Unable to create new config file");
     return;
@@ -292,6 +330,8 @@ void _writeConfig(bool force_format)
   JsonObject root = doc.to<JsonObject>();
 
   root["blynk_auth"] = blynk_auth;
+  root["syslog_server"] = syslog_server;
+  root["sample_interval"] = sample_interval;
   root["device_id"] = device_id;
   root["ota_password"] = ota_password;
 
@@ -317,7 +357,7 @@ void _wifi_connect_callback(WiFiEvent_t event, WiFiEventInfo_t info)
 #else
   strlcpy(ip_addr_str, IPAddress(info.got_ip.ip_info.ip.addr).toString().c_str(), sizeof(ip_addr_str));
 #endif
-  ALERT("WiFi connected, IP: %s", ip_addr_str);
+  NOTICE("WiFi connected, IP: %s OTA: %s", ip_addr_str, ota_password);
   wifiConnected = true;
   blink_rate = 500;
   blink_duty = 50;
@@ -362,11 +402,13 @@ void _wifiMgr_setup(bool reset)
 {
   _readConfig();
 
-  ALERT("Wifi manager setup");
+  DEBUG("Wifi manager setup");
   // The extra parameters to be configured (can be either global or just in the setup)
   // After connecting, parameter.getValue() will get you the configured value
   // id/name placeholder/prompt default length
-  WiFiManagerParameter custom_blynk_auth("blynk_auth", "blynk appkey", blynk_auth, sizeof(blynk_auth));
+  WiFiManagerParameter custom_blynk_auth("blynk_auth", "Blynk Auth Token", blynk_auth, sizeof(blynk_auth));
+  WiFiManagerParameter custom_syslog_server("syslog_server", "Log server (blank for none)", syslog_server, sizeof(syslog_server));
+  WiFiManagerParameter custom_sample_interval("sample_interval", "Sample interval (seconds)", sample_interval, sizeof(sample_interval));
   WiFiManagerParameter custom_device_id("device_id", "Device ID", device_id, sizeof(device_id));
   WiFiManagerParameter custom_ota_password("ota_password", "Update Password", ota_password, sizeof(ota_password));
   WiFiManagerParameter custom_reformat("reformat", "Force format", reformat, sizeof(reformat));
@@ -384,6 +426,8 @@ void _wifiMgr_setup(bool reset)
   
   //add all your parameters here
   wifiManager.addParameter(&custom_blynk_auth);
+  wifiManager.addParameter(&custom_syslog_server);
+  wifiManager.addParameter(&custom_sample_interval);
   wifiManager.addParameter(&custom_device_id);
   wifiManager.addParameter(&custom_ota_password);
   wifiManager.addParameter(&custom_reformat);
@@ -425,11 +469,13 @@ void _wifiMgr_setup(bool reset)
   }
 
   //if you get here you have connected to the WiFi
-  ALERT("Connected to WiFi");
+  DEBUG("Connected to WiFi");
   wifiConnected = true;
 
   //read updated parameters
   strlcpy(blynk_auth, custom_blynk_auth.getValue(),sizeof(blynk_auth));
+  strlcpy(syslog_server, custom_syslog_server.getValue(),sizeof(syslog_server));
+  strlcpy(sample_interval, custom_sample_interval.getValue(),sizeof(sample_interval));
   strlcpy(device_id, custom_device_id.getValue(), sizeof(device_id));
   strlcpy(ota_password, custom_ota_password.getValue(), sizeof(ota_password));
   strlcpy(reformat, custom_reformat.getValue(), sizeof(reformat));
@@ -443,7 +489,7 @@ void _wifiMgr_setup(bool reset)
 
   MDNS.begin(device_id);
   
-  ALERT("My IP Address: %s", WiFi.localIP().toString().c_str());
+  NOTICE("ESP32 WiFi ready.  My IP Address is %s", WiFi.localIP().toString().c_str());
 }
 
 void _OTAUpdate_setup() {
@@ -491,13 +537,13 @@ void wifi_setup()
   pinMode(PIN_CLEAR, INPUT_PULLUP);
 #endif
 	  
-  ENTER(L_NOTICE);
+  ENTER(L_DEBUG);
 #ifdef ESP8266
   _gotIpEventHandler = WiFi.onStationModeGotIP(_wifi_connect_callback);
 #else // ESP32
   WiFi.onEvent(_wifi_connect_callback, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
 #endif
-  _wifiMgr_setup(true);
+  _wifiMgr_setup(SETTINGS_RESET);
   _OTAUpdate_setup();
 
 #ifdef ESP8266  
