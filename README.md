@@ -99,6 +99,15 @@ called the "TTGO Mini 32".   This board has an ESP32 processor, some
 memory, a USB port, a battery charger, and some sockets for attaching
 sensors.
 
+The ESP32 microprocessor has a number of built in peripheral devices.
+It has a WiFI radio, a bluetooth radio, some communication interfaces
+and a number of General Purpose Input Output Pins (GPIOs).   A GPIO
+pin can be programmed to **output** either High Voltage (3.3v) or Low
+Voltage (0v).  We use this voltage to control outside devices.   A
+GPIO pin can also be programmed to *sense* voltage, or act as an
+**input**, a high voltage will be read as a 1 and a low voltage will
+be read as a 0.
+
 ## Step one: make it blink
 
 We are going to make the built-in Light Emitting Diode (LED) flash on
@@ -106,15 +115,80 @@ the board.  This is perhaps the simplest thing you can make a
 microprocessor do, and it's traditionally the first program we run on
 a new device, just to confirm that everything works.
 
-Let's begin 
+Let's begin by opening the Arduino IDE.
+
+Now select from the menu bar `File -> Examples -> 01.Basics -> Blink`.
+A new window will open containing the **source code** of one of the
+Arduino example programs.   This one just makes a light blink.
+
+Many development boards have a built in Light Emitting Diode (LED) for
+testing.  Your **TTGO Mini 32** development board has three
+
+	* A red power LED that is always on
+	* A blue LED that lights up when the battery is charging
+	* A green LED that is connected to the ESP32's "General Purpose
+      Input/Output number 22", or GPIO22.   
+	  
+We are going to modify this blink program to use GPIO22, by adding one
+more line after line 24.
+
+```
+#define LED_BUILTIN 22
+```
+
+Lines 20-30 should thus look like
+
+```
+ This example code is in the public domain.
+
+  http://www.arduino.cc/en/Tutorial/Blink
+*/
+
+#define LED_BUILTIN 22
+// the setup function runs once when you press reset or power the board
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+```
+
+What does all this mean? [You can learn more here](https://accelerando.com.au/learn/microcontrollers/programming/).
+
+Note, when reading the above article, that the original Arduino (with Atmel AVR microprocessor) has its
+LED on GPIO13, while our ESP32 uses GPIO22.
 
 ## Step two: install the Spike program
 
-If you are reading these instructions on Github
+If you are reading these instructions on Github, look at the top right
+of the page for a green button marked "clone or download".   Click it,
+then click "Download ZIP".    After the download completes, extract
+the downloaded Zipfile.
 
-## Step three: plug in the sensors
+Open up the Arduino IDE and choose `File -> Open`.   Look for the
+folder you extracted (named spike) and open `spike.ino`.
 
-## Oh wait, we ran out of sockets!?
+Click the 'Upload' button in the Arduino IDE (second from left in the
+toolbar).
+
+After the upload completes, click the "serial monitor" button, at the far right of the
+toolbar.    A window should open showing messages from the ESP32.
+
+You should see some messages that look like
+
+```
+IoTBNE Garden Spike, v1 May 2019
+#      33 NOTICE void _printWakeReason()(238) ESP Wakeup reason: other
+#      33 NOTICE void setup()(186) IO Setup
+```
+
+(and many more).
+
+## Step three: get your Spike on the WiFi
+
+## Step four: plug in the sensors
+
+## Oh wait, we ran out of sockets!
 
 
 # Oh yuck, how do we replace that monstrosity?
