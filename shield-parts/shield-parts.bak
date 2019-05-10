@@ -1,0 +1,126 @@
+EESchema Schematic File Version 4
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L wemos_mini:WeMos_mini U1
+U 1 1 5CD60680
+P 8800 1700
+F 0 "U1" H 8800 2443 60  0000 C CNN
+F 1 "WeMos_mini" H 8800 2337 60  0000 C CNN
+F 2 "wemos-d1-mini:wemos-d1-mini-with-pin-header-and-connector" H 9350 1000 60  0001 C CNN
+F 3 "http://www.wemos.cc/Products/d1_mini.html" H 8800 2231 60  0000 C CNN
+	1    8800 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x03_Female J1
+U 1 1 5CD608CB
+P 2000 1500
+F 0 "J1" H 2027 1526 50  0000 L CNN
+F 1 "Conn_01x03_Female" H 2027 1435 50  0000 L CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 2000 1500 50  0001 C CNN
+F 3 "~" H 2000 1500 50  0001 C CNN
+	1    2000 1500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x02_Male J2
+U 1 1 5CD60B2A
+P 3600 1550
+F 0 "J2" H 3706 1728 50  0000 C CNN
+F 1 "Conn_01x02_Male" H 3706 1637 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Angled_1x02_Pitch2.54mm" H 3600 1550 50  0001 C CNN
+F 3 "~" H 3600 1550 50  0001 C CNN
+	1    3600 1550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x04_Male J3
+U 1 1 5CD60D13
+P 5050 1550
+F 0 "J3" H 5156 1828 50  0000 C CNN
+F 1 "Conn_01x04_Male" H 5156 1737 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Angled_1x04_Pitch2.54mm" H 5050 1550 50  0001 C CNN
+F 3 "~" H 5050 1550 50  0001 C CNN
+	1    5050 1550
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R R1
+U 1 1 5CD60E87
+P 3650 2450
+F 0 "R1" H 3720 2496 50  0000 L CNN
+F 1 "R" H 3720 2405 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 3580 2450 50  0001 C CNN
+F 3 "~" H 3650 2450 50  0001 C CNN
+	1    3650 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R R2
+U 1 1 5CD60FB4
+P 5950 2550
+F 0 "R2" H 6020 2596 50  0000 L CNN
+F 1 "R" H 6020 2505 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 5880 2550 50  0001 C CNN
+F 3 "~" H 5950 2550 50  0001 C CNN
+	1    5950 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R R4
+U 1 1 5CD610A4
+P 6400 2550
+F 0 "R4" H 6470 2596 50  0000 L CNN
+F 1 "R" H 6470 2505 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 6330 2550 50  0001 C CNN
+F 3 "~" H 6400 2550 50  0001 C CNN
+	1    6400 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R R3
+U 1 1 5CD610FF
+P 5950 3200
+F 0 "R3" H 6020 3246 50  0000 L CNN
+F 1 "R" H 6020 3155 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 5880 3200 50  0001 C CNN
+F 3 "~" H 5950 3200 50  0001 C CNN
+	1    5950 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R R5
+U 1 1 5CD6122D
+P 6400 3200
+F 0 "R5" H 6470 3246 50  0000 L CNN
+F 1 "R" H 6470 3155 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 6330 3200 50  0001 C CNN
+F 3 "~" H 6400 3200 50  0001 C CNN
+	1    6400 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Screw_Terminal_01x02 J4
+U 1 1 5CD613D0
+P 6250 1600
+F 0 "J4" H 6330 1592 50  0000 L CNN
+F 1 "Screw_Terminal_01x02" H 6330 1501 50  0000 L CNN
+F 2 "TerminalBlocks_Phoenix:TerminalBlock_Phoenix_MPT-2.54mm_2pol" H 6250 1600 50  0001 C CNN
+F 3 "~" H 6250 1600 50  0001 C CNN
+	1    6250 1600
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC
