@@ -385,14 +385,14 @@ first**
 Now tap the "Scan QR" code icon in the blynk toolbar and scan this
 code.   This will create a copy of the Spike Application.
 
-![QR Code for simple application](img/app_simple.jpg)
+![QR Code for simple application](img/app-simple.jpg)
 
 Blynk allows simple apps to be created for free.  For more complex
 apps extra widgets may be purchased via in-app purchase.   You can
 scan the code below to obtain a more complex app, but you may have to
 spend a couple of dollars to unlock extra widgets.
 
-![QR Code for complez application](img/app_complex.jpg)
+![QR Code for complez application](img/app-complex.jpg)
 
 #### Configure your device to connect to your application
 
