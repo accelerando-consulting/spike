@@ -44,6 +44,9 @@ the IoT devices have recorded, or even send them commands.   You could
 argue that intelligent systems like Alexa, Siri, Google, Cortana and
 friends are bilingual, they are part IoP and part IoT.
 
+![](img/spike-top.jpg)
+![](img/spike-side.jpg)
+
 # Getting started with the software
 
 We are going to use a programming environment called "Arduino", named
@@ -112,6 +115,8 @@ called the "TTGO Mini 32".  This board has an ESP32 processor, some
 memory, a USB port, a battery charger, and some sockets for attaching
 sensors.
 
+![The TTGO Mini32 development board for ESP32](img/ttgo-mini32.jpg)
+
 In broad terms, a computer consists of a **Central Processing Unit
 (CPU)** which processes information, and **peripheral devices** which
 provide information about the real world, or turn information into
@@ -148,7 +153,7 @@ Now select from the menu bar `File -> Examples -> 01.Basics -> Blink`.
 A new window will open containing the **source code** of one of the
 Arduino example programs.   This one just makes a light blink.
 
-!()[img/blink_sketch.png]
+![](img/blink_sketch.png)
 
 Many development boards have a built in Light Emitting Diode (LED) for
 testing.  Your **TTGO Mini 32** development board has three
@@ -233,16 +238,43 @@ flashing!   You have compiled and uploaded your first program.
 
 ## Step two: install the Spike program
 
+### Download spike
+
 Now lets install the program that makes our module perform the task we
 want, to act as a garden soil sensor.
 
 If you are reading these instructions on Github, look at the top right
 of the page for a green button marked "clone or download".   Click it,
 then click "Download ZIP".    After the download completes, extract
-the downloaded Zipfile.
+the downloaded Zipfile. 
 
 Open up the Arduino IDE and choose `File -> Open`.   Look for the
 folder you extracted (named spike) and open `spike.ino`.
+
+Make sure you download the whole project (as a ZIP file or via `git
+clone`, **not just** the `spike.ino` file).
+
+### Install libraries
+
+Spike makes use of some **library code** written by other authors.
+Libraries provide ways to do common tasks without having to build
+everything from scratch yourself.
+
+In the Arduino IDE selec the menu `Sketch -> Include Library -> Manage
+Libraries`.   Search for and install the following libraries.
+
+* Blynk
+* DHT sensor library for ESPx
+* ArduinoJSON (**select version 6.6.0-beta**)
+
+The following library is not in the library manager list, and must be
+downloaded separately.   On Windows unzip it to Documents/Arduino/libraries.
+Location on Mac or Linux may vary, place it where you find the other
+libraries (eg search for Blynk after installing it).
+
+* https://github.com/unixbigot/WIFIMANAGER-ESP32/archive/HTTPHEAD.zip
+
+### Run the program
 
 Click the 'Upload' button in the Arduino IDE (second from left in the
 toolbar).
@@ -286,12 +318,14 @@ messages.  Look for a mesage about having connected to the WiFi
 and received an IP address.
 
 If the board cannot connect to WiFi it will go back to the access
-point mode, and you can connect it to change the settings.
+point mode, and you can connect it to change the settings.   The
+message window will contain the name of the hotspot that the device
+has created.
 
 If you want to force the board to go into setup mode, unplug any
-peripherals and connect a jumper lead between GPIO5 and GND, then
-reset the board.    It should go into access point mode (you can then
-remove the jumber lead).
+peripheral shields and connect a jumper lead between GPIO5 and GND,
+then reset the board.  It should go into access point mode (you can
+then remove the jumper lead).
 
 ## Step four: plug in the peripherals
 
@@ -319,6 +353,8 @@ minute it will reboot and repeat the process.   Forever.
 But, there are no peripherals attached yet, so the input values won't mean
 anything.  Let's attach our first sensor.
 
+![DHT Sensor](img/dht-shield.jpg)
+
 Our temperature and humidity sensor peripheral comes on a **shield**
 that plugs into the sockets on the dev board.  Make sure you orient it
 the correct way around (look for the pins marked RST at the top of the
@@ -329,20 +365,36 @@ Plug your spike back in, and open up the Arduino serial monitor.  When
 the board prints "SENSORS" you should see the temperature and humidity
 values start to make sense.
 
-### Let's make a dashboard.
+### Let's make a dashboard with "Blynk"
 
-We are going to use a free phone app called "Blynk" to view the sensor
+We are now going to use a free phone app called "**Blynk**" to view the sensor
 values.   Our board will transmit the readings to Blynk's servers, and
 our app will fetch them from the same server.
 
 Begin by searching your phone's app store for the Blynk application.
 Create an account which will allow you to host your own dashboards.
 
+#### Import the app
+
+**You must create an account on Blynk and log into Blynk on your phone
+first**
+
 Now tap the "Scan QR" code icon in the blynk toolbar and scan this
 code.   This will create a copy of the Spike Application.
 
-Tap the hexagonal "settings" icon, and look for a section marked "auth
-token".   Tap 'email' to email the token to yourself.
+![QR Code for simple application](img/app_simple.jpg)
+
+Blynk allows simple apps to be created for free.  For more complex
+apps extra widgets may be purchased via in-app purchase.   You can
+scan the code below to obtain a more complex app, but you may have to
+spend a couple of dollars to unlock extra widgets.
+
+![QR Code for complez application](img/app_complex.jpg)
+
+#### Configure your device to connect to your application
+
+In Blynk, tap the hexagonal "settings" icon, and look for a section
+marked "auth token".  Tap 'email' to email the token to yourself.
 
 Now we need to type that token into your Dev Board's settings.
 Connect GPIO5 to GND and reboot your board.   Join your board's WiFi
@@ -365,6 +417,10 @@ We have made our first IoT dashboard app.
 We have two more sensors to connect, a rain sensor and a soil moisture
 sensor. 
 
+![Rain sensor](img/rain-sensor.jpg)
+
+![Soil sensor](img/soil-sensor.jpg)
+
 ## Oh wait, we ran out of sockets!
 
 But where do we connect them?    The DHT shield is blocking the sockets.
@@ -375,8 +431,11 @@ socket above it.   But our DHT shield has only pins, no sockets.
 This is because we want it to be the "top" of the stack.   We must fit
 our other devices underneath it.
 
-But there is no "soil sensor shield" available for the D1 system, nor
-a "rain sensor shield".    So we made one.   It isn't pretty.
+But there is no "soil sensor shield" available to buy for the D1
+system, nor a "rain sensor shield".  So we made one.  We call it
+"Frankenshield".  It isn't pretty.
+
+![Frankenshield](img/frankenshield.jpg)
 
 In fact, we made the shield deliberately ugly to prove a point.   When
 you are at the proof of concept stage, you want rapid validation, so
@@ -410,8 +469,8 @@ the ESP32's analog input has a "12-bit precision").
 ### The rain sensor
 
 The rain sensor connects to the two pins on the left hand side of the
-Frankenshield.  It does not matter which way around the sensor is
-connected.
+Frankenshield.  **It does not matter which way around the sensor is
+connected.**
 
 **Warning: Science Content**: the following paragraph discusses
 **electrical resistance**.  If you are new to electronics, you can
@@ -464,6 +523,33 @@ soil, and a lower number in damp soil.  We subtract the result from
 being between 4095 (dry) and 0(wet) it is between 0 (dry) and 100
 (wet).  You can thus think of this reading as "X percent damp".
 
+The soil sensor is an **active sensor**, which means we must give it
+power to operate the electronic circuit built into the probe.   The
+probe has 3 wires: 
+
+  * Red - Power (3.3volts)
+  * Black - Ground (0 volts)
+  * Yellow - output voltage (this will
+carry a voltage that varies between 0v and 3.3v depending on soil
+moisture level).   
+
+We use a 4-pin connector with one pin removed, which makes it
+assymetrical; while not strictly necessary, this is a convenient way
+to prevent connecting the sensor "backwards".
+
+On the frankenshield there are three pins at the right with one
+separated.
+
+The two pins at left are for Power (L) and Ground (R).   The single
+pin on the right is for the yellow wire.
+
+You will need to remove the three sockets wires from the black
+housing, by lifting up the little black spring tabs on the housing and
+then gently tugging on the wire.   Your kit includes a four-pin
+housing into which you can insert the three sockets, leaving a gap to
+match the gap in the pins.   
+
+
 ### The hidden third sensor - battery voltage
 
 Many battery powered development boards connect the battery to one of
@@ -497,13 +583,11 @@ which is connected to the battery via a voltage-divider, giving half
 of the battery voltage.   We multiply the analog reading by `6.6/4095`, giving
 us a a number equal to the battery voltage.
 
-The soil sensor is an **active sensor**, which means we must give it
-power to operate the electronic circuit built into the probe.   The
-probe has 3 wires: Ground (0v), Power (3.3v) and Output (this will
-carry a voltage that varies between 0v and 3.3v depending on soil
-moisture level).   We use a 4-pin connector with one pin removed, 
-which makes it assymetrical; while not strictly necessary, this is a
-convenient way to prevent connecting the sensor "backwards".
+Your battery plugs into a small beige socket on the underside of the
+TTGO board.
+
+![battery](img/battery.jpg)
+
 
 ### Putting it all together
 

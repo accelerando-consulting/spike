@@ -28,6 +28,10 @@
 
 //@******************************* constants *********************************
 
+// change the name below to something unique (eg your name)
+#define HOTSPOT_NAME "myspike"
+
+
 #define SETTINGS_RESET false
 
 #define PIN_HELLO 22
@@ -439,7 +443,7 @@ void _wifiMgr_setup(bool reset)
 #endif      
     ) {
     ALERT("Doing factory reset of Wifi settings");
-    wifiManager.resetSettings();
+    wifiManager.startConfigPortal(HOTSPOT_NAME);
   }
   
   //set minimum quality of signal so it ignores AP's under that quality
