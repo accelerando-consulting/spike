@@ -377,13 +377,11 @@ our app will fetch them from the same server.
 Begin by searching your phone's app store for the Blynk application.
 Create an account which will allow you to host your own dashboards.
 
-#### Import the app
+#### Import the Spike dashboard into your Blynk App
 
-**You must create an account on Blynk and log into Blynk on your phone
-first**
-
-Now tap the "Scan QR" code icon in the blynk toolbar and scan this
-code.   This will create a copy of the Spike Application.
+Open the Blynk app on your phone.  **Make sure you log in**.  Now tap
+the "Scan QR" code icon in the blynk toolbar and scan this code.  This
+will create a copy of the Spike Application.
 
 ![QR Code for simple application](img/app-simple.jpg)
 
