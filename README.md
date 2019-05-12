@@ -238,7 +238,7 @@ flashing!   You have compiled and uploaded your first program.
 
 ## Step two: install the Spike program
 
-### Download spike
+### Download the spike program from GitHub
 
 Now lets install the program that makes our module perform the task we
 want, to act as a garden soil sensor.
@@ -251,21 +251,25 @@ the downloaded Zipfile.
 Open up the Arduino IDE and choose `File -> Open`.   Look for the
 folder you extracted (named spike) and open `spike.ino`.
 
-Make sure you download the whole project (as a ZIP file or via `git
-clone`, **not just** the `spike.ino` file).
+**Please note**:
 
-### Install libraries
+* Make sure you download the whole project (as a ZIP file or via `git clone`, **not just** the `spike.ino` file).
+* You must rename the folder containing spike.ino and other files to be named `spike` (not, say `spike-master`).
 
-Spike makes use of some **library code** written by other authors.
+### Install third-party source-code libraries
+
+Spike makes use of some **library source code** written by other authors.
 Libraries provide ways to do common tasks without having to build
-everything from scratch yourself.
+everything from scratch yourself.  The Arduino system includes a large
+number of optional libraries that you can install to control many
+kinds of hardware.
 
-In the Arduino IDE selec the menu `Sketch -> Include Library -> Manage
-Libraries`.   Search for and install the following libraries.
+In the Arduino IDE select the menu `Sketch -> Include Library -> Manage
+Libraries`.   Search for and install the following libraries:
 
 * Blynk
 * DHT sensor library for ESPx
-* ArduinoJSON (**select version 6.6.0-beta**)
+* ArduinoJSON (**select version 6.6.0-beta before clicking install**)
 
 The following library is not in the library manager list, and must be
 downloaded separately.   On Windows unzip it to Documents/Arduino/libraries.
@@ -274,15 +278,16 @@ libraries (eg search for Blynk after installing it).
 
 * https://github.com/unixbigot/WIFIMANAGER-ESP32/archive/HTTPHEAD.zip
 
-### Run the program
+### Run the program (Upload it to your Mini32)
 
-Click the 'Upload' button in the Arduino IDE (second from left in the
-toolbar).
+Click the `Upload` button in the Arduino IDE (second from left in the
+toolbar, with the rightward-arrow icon).
 
-After the upload completes, click the "serial monitor" button, at the far right of the
-toolbar.    A window should open showing messages from the ESP32.
+After the upload completes, click the "serial monitor" button , at the
+far right of the toolbar (magnifying-glass icon, or select the menu
+`Tools -> Serial Monitor`).
 
-You should see some messages that look like
+A window should open showing messages from the ESP32.  You should see some messages that look like:
 
 ```
 IoTBNE Garden Spike, v1 May 2019
@@ -294,28 +299,26 @@ IoTBNE Garden Spike, v1 May 2019
 
 ## Step three: get your Spike on the WiFi
 
-Your spike doesn't know the WiFi password yet.  We could use the USB
-cable to send it the password, but you wouldn't want to have to go dig
-up your garden if you change the wifi password.
+Your spike doesn't know the name of your WiFI network, nor your WiFi
+password yet.  We could use the USB cable to send it this information
+password, or embed it in the source code, but you wouldn't want to
+have to go dig up your garden if you change your wifi password.
 
 So our program for the ESP32 will, if it cannot successfully join any
 WiFi network, create its own network named "esp_[number]".   When you
 join this network from your laptop or phone, it will display a web
-page where you can select which wifi to join and supply the password.
-You can also change other settings on this page.
+page where you can configure which wifi to join, and supply the password.
+You can also change some other settings on this page.
 
 This "captive portal" page uses the same mechanism that you may have
 encountered in internet cafes or hotel wifi.
 
-At the IoTBNE workshop, the WiFi to join is "**Accelerando Mobile**" and
-the password is "**people are friends not batteries**".
-
 Connect your ESP32 to your computer, and open the Arduino Serial
 Monitor.
 
-Press the reset switch on your board, and you should see some
-messages.  Look for a mesage about having connected to the WiFi 
-and received an IP address.
+Press the reset switch on your board (look for a tiny button marked
+`RST`), and you should see some messages.  Look for a mesage about
+having connected to the WiFi and received an IP address.
 
 If the board cannot connect to WiFi it will go back to the access
 point mode, and you can connect it to change the settings.   The
@@ -339,9 +342,9 @@ shields.  The top portion of the inner rows of pins on the TTGO
 matches the function of the D1s pins, so that we can plug in D1
 shields.
 
-The garden spike project uses a Digital Humidity and Temperature
-sensor (a module called the DHT11) fitted to a D1 shield.  Next we'll
-attach this sensor.
+The garden spike project uses a particular Digital Humidity and
+Temperature sensor (a module called the DHT11) fitted to a D1 shield.
+Next we'll attach this sensor.
 
 ### Temperature/Humidity sensor
 
