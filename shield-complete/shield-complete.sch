@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:shield-complete-cache
 EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
@@ -14,113 +15,328 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L wemos_mini:WeMos_mini U?
+L wemos_mini:WeMos_mini U1
 U 1 1 5CD61191
-P 8550 2000
-F 0 "U?" H 8550 2743 60  0000 C CNN
-F 1 "WeMos_mini" H 8550 2637 60  0000 C CNN
-F 2 "wemos-d1-mini:wemos-d1-mini-with-pin-header-and-connector" H 9100 1300 60  0001 C CNN
-F 3 "http://www.wemos.cc/Products/d1_mini.html" H 8550 2531 60  0000 C CNN
-	1    8550 2000
-	1    0    0    -1  
+P 4800 3550
+F 0 "U1" H 4800 4293 60  0000 C CNN
+F 1 "Lolin D1 Socket" H 4800 4187 60  0000 C CNN
+F 2 "wemos-d1-mini:wemos-d1-mini-with-pin-header-and-connector-no-outline" H 5350 2850 60  0001 C CNN
+F 3 "" H 4800 4081 60  0000 C CNN
+	1    4800 3550
+	-1   0    0    1   
 $EndComp
 $Comp
 L Connector:Conn_01x03_Female J1
 U 1 1 5CD61198
-P 1750 1800
-F 0 "J1" H 1777 1826 50  0000 L CNN
-F 1 "Conn_01x03_Female" H 1777 1735 50  0000 L CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1750 1800 50  0001 C CNN
-F 3 "~" H 1750 1800 50  0001 C CNN
-	1    1750 1800
+P 4250 3600
+F 0 "J1" H 3350 3850 50  0000 L CNN
+F 1 "ADC Pins" H 3500 3850 50  0000 L CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 4250 3600 50  0001 C CNN
+F 3 "~" H 4250 3600 50  0001 C CNN
+	1    4250 3600
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Male J2
 U 1 1 5CD6119F
-P 3350 1850
-F 0 "J2" H 3456 2028 50  0000 C CNN
-F 1 "Conn_01x02_Male" H 3456 1937 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Angled_1x02_Pitch2.54mm" H 3350 1850 50  0001 C CNN
-F 3 "~" H 3350 1850 50  0001 C CNN
-	1    3350 1850
-	1    0    0    -1  
+P 4000 2000
+F 0 "J2" V 3800 1750 50  0000 C CNN
+F 1 "Rain Sensor" V 3900 1900 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 4000 2000 50  0001 C CNN
+F 3 "~" H 4000 2000 50  0001 C CNN
+	1    4000 2000
+	0    1    1    0   
 $EndComp
 $Comp
 L Connector:Conn_01x04_Male J3
 U 1 1 5CD611A6
-P 4800 1850
-F 0 "J3" H 4906 2128 50  0000 C CNN
-F 1 "Conn_01x04_Male" H 4906 2037 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Angled_1x04_Pitch2.54mm" H 4800 1850 50  0001 C CNN
-F 3 "~" H 4800 1850 50  0001 C CNN
-	1    4800 1850
-	1    0    0    -1  
+P 4550 2000
+F 0 "J3" V 4350 1750 50  0000 C CNN
+F 1 "Soil Sensor" V 4450 1900 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 4550 2000 50  0001 C CNN
+F 3 "~" H 4550 2000 50  0001 C CNN
+	1    4550 2000
+	0    -1   1    0   
 $EndComp
 $Comp
 L device:R R1
 U 1 1 5CD611AD
-P 3400 2750
-F 0 "R1" H 3470 2796 50  0000 L CNN
-F 1 "R" H 3470 2705 50  0000 L CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 3330 2750 50  0001 C CNN
-F 3 "~" H 3400 2750 50  0001 C CNN
-	1    3400 2750
-	1    0    0    -1  
+P 2950 3750
+F 0 "R1" H 3020 3796 50  0000 L CNN
+F 1 "1M" H 3020 3705 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 2880 3750 50  0001 C CNN
+F 3 "~" H 2950 3750 50  0001 C CNN
+	1    2950 3750
+	-1   0    0    1   
 $EndComp
 $Comp
 L device:R R2
 U 1 1 5CD611B4
-P 5700 2850
-F 0 "R2" H 5770 2896 50  0000 L CNN
-F 1 "R" H 5770 2805 50  0000 L CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 5630 2850 50  0001 C CNN
-F 3 "~" H 5700 2850 50  0001 C CNN
-	1    5700 2850
+P 5800 3900
+F 0 "R2" H 5870 3946 50  0000 L CNN
+F 1 "10k" H 5870 3855 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 5730 3900 50  0001 C CNN
+F 3 "~" H 5800 3900 50  0001 C CNN
+	1    5800 3900
 	1    0    0    -1  
 $EndComp
 $Comp
 L device:R R4
 U 1 1 5CD611BB
-P 6150 2850
-F 0 "R4" H 6220 2896 50  0000 L CNN
-F 1 "R" H 6220 2805 50  0000 L CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 6080 2850 50  0001 C CNN
-F 3 "~" H 6150 2850 50  0001 C CNN
-	1    6150 2850
+P 6350 3900
+F 0 "R4" H 6420 3946 50  0000 L CNN
+F 1 "10k" H 6420 3855 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 6280 3900 50  0001 C CNN
+F 3 "~" H 6350 3900 50  0001 C CNN
+	1    6350 3900
 	1    0    0    -1  
 $EndComp
 $Comp
 L device:R R3
 U 1 1 5CD611C2
-P 5700 3500
-F 0 "R3" H 5770 3546 50  0000 L CNN
-F 1 "R" H 5770 3455 50  0000 L CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 5630 3500 50  0001 C CNN
-F 3 "~" H 5700 3500 50  0001 C CNN
-	1    5700 3500
+P 5800 4200
+F 0 "R3" H 5870 4246 50  0000 L CNN
+F 1 "10k" H 5870 4155 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 5730 4200 50  0001 C CNN
+F 3 "~" H 5800 4200 50  0001 C CNN
+	1    5800 4200
 	1    0    0    -1  
 $EndComp
 $Comp
 L device:R R5
 U 1 1 5CD611C9
-P 6150 3500
-F 0 "R5" H 6220 3546 50  0000 L CNN
-F 1 "R" H 6220 3455 50  0000 L CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 6080 3500 50  0001 C CNN
-F 3 "~" H 6150 3500 50  0001 C CNN
-	1    6150 3500
+P 6350 4200
+F 0 "R5" H 6420 4246 50  0000 L CNN
+F 1 "10k" H 6420 4155 50  0000 L CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 6280 4200 50  0001 C CNN
+F 3 "~" H 6350 4200 50  0001 C CNN
+	1    6350 4200
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Screw_Terminal_01x02 J4
 U 1 1 5CD611D0
-P 6000 1900
-F 0 "J4" H 6080 1892 50  0000 L CNN
-F 1 "Screw_Terminal_01x02" H 6080 1801 50  0000 L CNN
-F 2 "TerminalBlocks_Phoenix:TerminalBlock_Phoenix_MPT-2.54mm_2pol" H 6000 1900 50  0001 C CNN
-F 3 "~" H 6000 1900 50  0001 C CNN
-	1    6000 1900
+P 5450 2100
+F 0 "J4" V 5750 2200 50  0000 L CNN
+F 1 "Solar (Max 6v6)" V 5650 1700 50  0000 L CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 5450 2100 50  0001 C CNN
+F 3 "~" H 5450 2100 50  0001 C CNN
+	1    5450 2100
+	0    -1   -1   0   
+$EndComp
+Text Label 3800 3600 2    50   ~ 0
+GPIO33-SOIL
+Text Label 3800 3500 2    50   ~ 0
+GPIO35-RAIN
+Text Label 3800 3700 2    50   ~ 0
+GPIO34-BATT
+Wire Wire Line
+	3800 3600 4000 3600
+Wire Wire Line
+	3800 3700 4000 3700
+$Comp
+L power:GND #PWR0101
+U 1 1 5CDD259E
+P 2950 3900
+F 0 "#PWR0101" H 2950 3650 50  0001 C CNN
+F 1 "GND" H 2955 3727 50  0000 C CNN
+F 2 "" H 2950 3900 50  0001 C CNN
+F 3 "" H 2950 3900 50  0001 C CNN
+	1    2950 3900
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	2950 3600 2950 3500
+Wire Wire Line
+	4300 3900 3550 3900
+$Comp
+L power:+3.3V #PWR0102
+U 1 1 5CDD6211
+P 3550 3900
+F 0 "#PWR0102" H 3550 3750 50  0001 C CNN
+F 1 "+3.3V" H 3700 4000 50  0000 C CNN
+F 2 "" H 3550 3900 50  0001 C CNN
+F 3 "" H 3550 3900 50  0001 C CNN
+	1    3550 3900
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3.3V #PWR0103
+U 1 1 5CDD63F9
+P 5050 2500
+F 0 "#PWR0103" H 5050 2350 50  0001 C CNN
+F 1 "+3.3V" H 5200 2600 50  0000 C CNN
+F 2 "" H 5050 2500 50  0001 C CNN
+F 3 "" H 5050 2500 50  0001 C CNN
+	1    5050 2500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3900 3500 4050 3500
+Wire Wire Line
+	4000 2200 4000 2600
+$Comp
+L power:GND #PWR0104
+U 1 1 5CDD70E4
+P 4750 2350
+F 0 "#PWR0104" H 4750 2100 50  0001 C CNN
+F 1 "GND" H 4755 2177 50  0000 C CNN
+F 2 "" H 4750 2350 50  0001 C CNN
+F 3 "" H 4750 2350 50  0001 C CNN
+	1    4750 2350
+	1    0    0    -1  
+$EndComp
+Connection ~ 3900 3500
+Wire Wire Line
+	2950 3500 3900 3500
+Wire Wire Line
+	4000 3600 4000 2800
+Wire Wire Line
+	4000 2800 4450 2800
+Connection ~ 4000 3600
+Wire Wire Line
+	4000 3600 4050 3600
+Text Label 4550 2450 3    50   ~ 0
+NC
+$Comp
+L power:GND #PWR0105
+U 1 1 5CDD7C73
+P 5450 2350
+F 0 "#PWR0105" H 5450 2100 50  0001 C CNN
+F 1 "GND" H 5455 2177 50  0000 C CNN
+F 2 "" H 5450 2350 50  0001 C CNN
+F 3 "" H 5450 2350 50  0001 C CNN
+	1    5450 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0106
+U 1 1 5CDD871A
+P 5800 4650
+F 0 "#PWR0106" H 5800 4400 50  0001 C CNN
+F 1 "GND" H 5805 4477 50  0000 C CNN
+F 2 "" H 5800 4650 50  0001 C CNN
+F 3 "" H 5800 4650 50  0001 C CNN
+	1    5800 4650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4300 3300 4200 3300
+Wire Wire Line
+	4200 3300 4200 2950
+Wire Wire Line
+	4200 2950 6250 2950
+Wire Wire Line
+	6250 2950 6250 4050
+Wire Wire Line
+	6350 4500 6350 4350
+Wire Wire Line
+	5300 3900 5650 3900
+Wire Wire Line
+	5650 3900 5650 3650
+Wire Wire Line
+	5650 3650 5800 3650
+Wire Wire Line
+	5800 3650 5800 3750
+Wire Wire Line
+	4000 3700 4000 4050
+Connection ~ 4000 3700
+Wire Wire Line
+	4000 3700 4050 3700
+Text Label 5350 2950 0    50   ~ 0
+GPIO36-SOLAR
+$Comp
+L Connector:Conn_01x04_Male J5
+U 1 1 5CDE11AD
+P 6150 2000
+F 0 "J5" V 5950 1750 50  0000 C CNN
+F 1 "I2C" V 6050 1900 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 6150 2000 50  0001 C CNN
+F 3 "~" H 6150 2000 50  0001 C CNN
+	1    6150 2000
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	4650 2600 4650 2200
+Wire Wire Line
+	4550 2450 4550 2200
+Wire Wire Line
+	4450 2800 4450 2200
+Wire Wire Line
+	5300 3400 6050 3400
+Wire Wire Line
+	6050 3400 6050 2200
+Wire Wire Line
+	5300 3500 6150 3500
+Wire Wire Line
+	4650 2600 5050 2600
+Wire Wire Line
+	6250 2600 6250 2200
+Connection ~ 4650 2600
+$Comp
+L power:GND #PWR0107
+U 1 1 5CDE5B0E
+P 6350 2350
+F 0 "#PWR0107" H 6350 2100 50  0001 C CNN
+F 1 "GND" H 6355 2177 50  0000 C CNN
+F 2 "" H 6350 2350 50  0001 C CNN
+F 3 "" H 6350 2350 50  0001 C CNN
+	1    6350 2350
+	1    0    0    -1  
+$EndComp
+Text Label 5300 3400 0    50   ~ 0
+SCL
+Text Label 5300 3500 0    50   ~ 0
+SDA
+Text Label 5300 3900 0    50   ~ 0
+VBAT
+Text Label 5900 2800 2    50   ~ 0
+VSOLAR
+Text Label 5300 3800 0    50   ~ 0
+GND
+Wire Wire Line
+	6150 2200 6150 3500
+Wire Wire Line
+	3900 2200 3900 3500
+Wire Wire Line
+	6350 3750 6350 2800
+Wire Wire Line
+	6350 2800 5550 2800
+Wire Wire Line
+	5550 2800 5550 2300
+Wire Wire Line
+	4750 2350 4750 2200
+Wire Wire Line
+	5450 2350 5450 2300
+Wire Wire Line
+	6350 2350 6350 2200
+Wire Wire Line
+	4000 2600 4650 2600
+Wire Wire Line
+	5050 2500 5050 2600
+Connection ~ 5050 2600
+Wire Wire Line
+	5050 2600 6250 2600
+Wire Wire Line
+	6250 4050 6350 4050
+Connection ~ 6350 4050
+Wire Wire Line
+	5800 4350 5800 4500
+Connection ~ 5800 4050
+Wire Wire Line
+	4000 4050 5800 4050
+Connection ~ 6350 4350
+Wire Wire Line
+	6350 4350 6350 4300
+Wire Wire Line
+	5300 3800 5550 3800
+Wire Wire Line
+	5550 3800 5550 4500
+Wire Wire Line
+	5550 4500 5800 4500
+Connection ~ 5800 4500
+Wire Wire Line
+	5800 4500 5800 4650
+Wire Wire Line
+	5800 4500 6350 4500
 $EndSCHEMATC
