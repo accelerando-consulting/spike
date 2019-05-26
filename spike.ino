@@ -19,7 +19,15 @@
 #include <ArduinoJson.h>
 #include <Ticker.h>
 #include <time.h>
+
+#define TEMP_SENSOR_DHT11
+#undef  TEMP_SENSOR_DHT12
+
+#ifdef TEMP_SENSOR_DHT11
 #include <DHTesp.h>
+#elif defined(TEMP_SENSOR_DHT12)
+#include <DHT12.h>
+#endif
 
 #define SYSLOG_flag wifiConnected
 #define SYSLOG_host syslog_server
@@ -31,8 +39,9 @@
 // change the name below to something unique (eg your name)
 #define HOTSPOT_NAME "myspike"
 
-
 #define SETTINGS_RESET false
+#define WIFI_DEBUG false
+
 
 #define PIN_HELLO 22
 /*
@@ -43,6 +52,7 @@
 #define PIN_BATTERY 34
 #define PIN_SOIL 33
 #define PIN_RAIN 35
+#define PIN_SOLR 36
 
 #define PIN_TEMP 16
 #define PIN_CLEAR 5
@@ -52,6 +62,8 @@
 #define BLYNK_RAIN 2
 #define BLYNK_TEMP 3
 #define BLYNK_HUM  4
+#define BLYNK_SOLR  5
+#define BLYNK_SLEEP 6
 
 #ifdef ESP8266
 #define CONFIG_FILE "config.json"
@@ -59,9 +71,11 @@
 #define CONFIG_FILE "/config.json"
 #endif
 
-#ifndef NETWORK_RECONNECT_SECONDS 
+#ifndef NETWORK_RECONNECT_SECONDS
 #define NETWORK_RECONNECT_SECONDS 5
 #endif
+
+const char *wake_reason = NULL; // will be filled in during startup
 
 //@******************************* variables *********************************
 
@@ -74,10 +88,11 @@ char sample_interval[10] = "60";
 char syslog_server[40] = "";
 char ota_password[20] = "changeme";
 
-// 
+//
 // Network resources
 //
 bool wifiConnected = false;
+bool blynkConnected = false;
 
 WiFiClient espClient;
 
@@ -87,14 +102,21 @@ WiFiEventHandler _gotIpEventHandler, _disconnectedEventHandler;
 #endif
 Ticker wifiReconnectTimer;
 
+
 int blink_rate = 100;
 int blink_duty = 50;
 char ip_addr_str[20] = "unset";
 char reformat[8] = "no";
+bool doSleep = true;
 
+#ifdef TEMP_SENSOR_DHT11
 DHTesp dht;
+#elif defined(TEMP_SENSOR_DHT12)
+DHT12 dht;
+#endif
 
 int battRaw;
+int solrRaw;
 int rainRaw;
 int soilRaw;
 
@@ -103,7 +125,7 @@ int soilRaw;
 //@********************************** loop ***********************************
 
 void loop(void)
-{  
+{
   unsigned long now = millis();
 
 #ifdef PIN_HELLO
@@ -118,12 +140,23 @@ void loop(void)
   }
 #endif
 
-  
-  // 
+  //
   // Handle network Events
-  // 
+  //
   ArduinoOTA.handle();
-  Blynk.run();
+  if (blynkConnected) {
+    Blynk.run();
+  } else if (strlen(blynk_auth)>0) {
+    //
+    // Connection failed previously, retry one last time
+    //
+    if (Blynk.connect()) {
+      NOTICE("Blynk connected");
+      blynkConnected=true;
+      Blynk.run();
+    }
+  }
+
 
 
   //
@@ -138,38 +171,64 @@ void loop(void)
     battRaw = analogRead(PIN_BATTERY);
   }
   float voltage = (battRaw/4095.0) * 3.3f * 2.0f;
-  Blynk.virtualWrite(BLYNK_BATTERY, voltage);
+
+  if (PIN_SOLR>=32) {
+    solrRaw = analogRead(PIN_SOLR);
+  }
+  float solr = (solrRaw/4095.0) * 3.3f * 2.0f;
 
   if (PIN_SOIL >= 32) {
     soilRaw = analogRead(PIN_SOIL);
   }
   float soil = ((4095-soilRaw)/4095.0)*100.0f;
-  Blynk.virtualWrite(BLYNK_SOIL, soil);
 
   if (PIN_RAIN >= 32) {
     rainRaw = analogRead(PIN_RAIN);
   }
   float rain = (rainRaw/4095.0) * 100.0f;
-  Blynk.virtualWrite(BLYNK_RAIN, rain);
 
+#ifdef TEMP_SENSOR_DHT11
   float temp = dht.getTemperature();
-  Blynk.virtualWrite(BLYNK_TEMP, temp);
-  
   float hum = dht.getHumidity();
-  Blynk.virtualWrite(BLYNK_HUM, hum);
+#elif defined(TEMP_SENSOR_DHT12)
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
+#endif
+  NOTICE("battRaw=%d soilRaw=%d rainRaw=%d solrRaw=%d", battRaw, soilRaw, rainRaw, solrRaw);
 
-  NOTICE("battRaw=%d soilRaw=%d rainRaw=%d", battRaw, soilRaw, rainRaw);
-  Blynk.run();
+  if (blynkConnected) {
+    NOTICE("Sending to blynk");
+    Blynk.virtualWrite(BLYNK_BATTERY, voltage);
+    Blynk.virtualWrite(BLYNK_SOLR, solr);
+    Blynk.virtualWrite(BLYNK_SOIL, soil);
+    Blynk.virtualWrite(BLYNK_RAIN, rain);
+    Blynk.virtualWrite(BLYNK_TEMP, temp);
+    Blynk.virtualWrite(BLYNK_HUM, hum);
+  }
+  else {
+    NOTICE("Unable to send to blynk");
+  }
 
-  NOTICE("SENSORS: batt=%.2fv soil=%.2f%% rain=%.2f%% temp=%.1fC hum=%.1f%%",
-	 voltage, soil, rain, temp, hum);
+  if (blynkConnected) {
+    Blynk.run();
+  }
+  NOTICE("SENSORS: batt=%.2fv soil=%.2f%% rain=%.2f%% temp=%.1fC hum=%.1f%% solr=%.2fv",
+	 voltage, soil, rain, temp, hum, solr);
 
-  int sleep_secs = atoi(sample_interval);
-  if (sleep_secs < 1) sleep_secs = 60;
-  NOTICE("Going to sleep for %d sec", sleep_secs);
-  esp_sleep_enable_timer_wakeup(sleep_secs * 1000 * 1000);
-  Serial.flush();
-  esp_deep_sleep_start();
+  if (doSleep) {
+    int sleep_secs = atoi(sample_interval);
+    if (sleep_secs < 1) sleep_secs = 60;
+    NOTICE("Going to sleep for %d sec", sleep_secs);
+    esp_sleep_enable_timer_wakeup(sleep_secs * 1000 * 1000);
+    Serial.flush();
+    delay(1000); // let network packets drain
+    esp_deep_sleep_start();
+  }
+  else {
+    // when the device is put into no sleep mode, just keep swimming
+    delay(5000);
+  }
+
 }
 
 //
@@ -177,14 +236,14 @@ void loop(void)
 
 void setup(void)
 {
-  // 
+  //
   // Set up the serial port for diagnostic trace
-  // 
+  //
   Serial.begin(115200);
   Serial.println("\n\nIoTBNE Garden Spike, v1 May 2019");
   _printWakeReason();
 
-  // 
+  //
   // Set up the IO devices
   //
   NOTICE("IO Setup");
@@ -193,36 +252,48 @@ void setup(void)
   pinMode(PIN_SOIL, INPUT);
   pinMode(PIN_RAIN, INPUT);
 
+#ifdef TEMP_SENSOR_DHT11
   dht.setup(PIN_TEMP, DHTesp::DHT11);
+#elif defined(TEMP_SENSOR_DHT12)
+  dht.begin();
+#endif
 
   // We have to read the sensors BEFORE enabling wifi because wifi disables ADC2
   battRaw = analogRead(PIN_BATTERY);
   soilRaw = analogRead(PIN_SOIL);
   rainRaw = analogRead(PIN_RAIN);
-  
-  // 
+  solrRaw = analogRead(PIN_SOLR);
+
+  //
   // Set up the WiFi connection and Blynk client
-  // 
+  //
   wifi_setup();
-
-  DEBUG("Blynk setup authkey=[%s]", blynk_auth);
-  // Don't call blynk.begin here because we already set up the wifi
-  Blynk.config(blynk_auth, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
-  while(Blynk.connect() != true) {
-    NOTICE("Waiting for Blynk...");
-    delay(5000);
-  }
-
 
   DEBUG("Setup complete");
 }
 
 //
+//
+//@****************************** Blynk events *******************************
+
+BLYNK_CONNECTED() {
+  ENTER(L_NOTICE);
+  Blynk.syncVirtual(V6);
+}
+
+BLYNK_WRITE(V6)
+{
+  ENTER(L_NOTICE);
+  doSleep = param.asInt();
+  NOTICE("doSleep <= %s", TRUTH(doSleep));
+}
+
+
+//
 //@******************************* functions *********************************
 
-void _printWakeReason(void) 
+void _printWakeReason(void)
 {
-  const char *wake_reason;
 #ifdef ESP8266
   wake_reason = ESP.getResetReason().c_str();
 #else
@@ -242,13 +313,13 @@ void _printWakeReason(void)
   NOTICE("ESP Wakeup reason: %s", wake_reason);
 }
 
-void _saveConfigCallback() 
+void _saveConfigCallback()
 {
   ALERT("Will save config");
   _shouldSaveConfig = true;
 }
 
-void _readConfig() 
+void _readConfig()
 {
   if (!SPIFFS.begin()) {
     ALERT("NO SPIFFS.  Formatting");
@@ -304,7 +375,7 @@ void _readConfig()
 
 }
 
-void _writeConfig(bool force_format) 
+void _writeConfig(bool force_format)
 {
   ALERT("saving config to flash");
 
@@ -318,7 +389,7 @@ void _writeConfig(bool force_format)
       return;
     }
   }
-      
+
   if (!SPIFFS.begin()) {
     ALERT("failed to mount FS");
     return;
@@ -350,12 +421,26 @@ void _writeConfig(bool force_format)
   configFile.close();
 }
 
+void printLocalTime()
+{
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    ALERT("Failed to obtain time from OS");
+    return;
+  }
+  char timebuf[40];
+  strftime(timebuf, sizeof(timebuf), "%A, %B %d %Y %H:%M:%S", &timeinfo);
+  NOTICE("Current time is %s", timebuf);
+}
+
 #ifdef ESP8266
-void _wifi_connect_callback(const WiFiEventStationModeGotIP& event) 
+void _wifi_connect_callback(const WiFiEventStationModeGotIP& event)
 #else
-void _wifi_connect_callback(WiFiEvent_t event, WiFiEventInfo_t info) 
+void _wifi_connect_callback(WiFiEvent_t event, WiFiEventInfo_t info)
 #endif
 {
+  ENTER(L_INFO);
+
 #ifdef ESP8266
   strlcpy(ip_addr_str, event.ip.toString().c_str(), sizeof(ip_addr_str));
 #else
@@ -367,16 +452,33 @@ void _wifi_connect_callback(WiFiEvent_t event, WiFiEventInfo_t info)
   blink_duty = 50;
 
   // Cancel any future connect attempt, as we are now connected
-  wifiReconnectTimer.detach(); 
+  wifiReconnectTimer.detach();
+
+  if (wake_reason && (wake_reason == "other")) {
+    // At cold boot, get the time from NTP
+    NOTICE("Getting time from NTP");
+    configTime(0,0,"pool.ntp.org");
+  }
+  printLocalTime();
 
   // Start trying to connect to Blynk
-  Blynk.connect();
+  if (strlen(blynk_auth)>0) {
+    DEBUG("Connecting to blynk app [%s]", blynk_auth);
+    if (Blynk.connect()) {
+      NOTICE("Connected to Blynk");
+      blynkConnected = true;
+    }
+    else {
+      NOTICE("Blynk connect failed (retry later)");
+    }
+  }
+  LEAVE;
 }
 
 #ifdef ESP8266
 void _wifi_disconnect_callback(const WiFiEventStationModeDisconnected& event)
 #else
-void _wifi_disconnect_callback(WiFiEvent_t event, WiFiEventInfo_t info) 
+void _wifi_disconnect_callback(WiFiEvent_t event, WiFiEventInfo_t info)
 #endif
 {
 #ifdef ESP8266
@@ -398,11 +500,11 @@ void _wifi_disconnect_callback(WiFiEvent_t event, WiFiEventInfo_t info)
   }
 // TODO: handle esp32 case here
 #endif
-  
+
   wifiReconnectTimer.once(NETWORK_RECONNECT_SECONDS, wifi_setup);
 }
 
-void _wifiMgr_setup(bool reset) 
+void _wifiMgr_setup(bool reset)
 {
   _readConfig();
 
@@ -421,13 +523,14 @@ void _wifiMgr_setup(bool reset)
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
+  wifiManager.setDebugOutput(WIFI_DEBUG);
 
   //set config save notify callback
   wifiManager.setSaveConfigCallback(_saveConfigCallback);
 
   //set static ip
   //wifiManager.setSTAStaticIPConfig(IPAddress(10,0,1,99), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
-  
+
   //add all your parameters here
   wifiManager.addParameter(&custom_blynk_auth);
   wifiManager.addParameter(&custom_syslog_server);
@@ -440,16 +543,16 @@ void _wifiMgr_setup(bool reset)
   if (reset
 #ifdef PIN_CLEAR
       || (digitalRead(PIN_CLEAR)==LOW)
-#endif      
+#endif
     ) {
     ALERT("Doing factory reset of Wifi settings");
     wifiManager.startConfigPortal(HOTSPOT_NAME);
   }
-  
+
   //set minimum quality of signal so it ignores AP's under that quality
   //defaults to 8%
   //wifiManager.setMinimumSignalQuality();
-  
+
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
   //in seconds
@@ -490,16 +593,16 @@ void _wifiMgr_setup(bool reset)
   if (_shouldSaveConfig) {
     _writeConfig(force_format);
   }
-
+  Blynk.config(blynk_auth, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
   MDNS.begin(device_id);
-  
+
   NOTICE("ESP32 WiFi ready.  My IP Address is %s", WiFi.localIP().toString().c_str());
 }
 
 void _OTAUpdate_setup() {
   ArduinoOTA.setHostname(device_id);
   ArduinoOTA.setPassword(ota_password);
-  
+
   ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
@@ -537,10 +640,10 @@ void _OTAUpdate_setup() {
 void wifi_setup()
 {
 #ifdef PIN_CLEAR
-  // short PIN_CLEAR to ground at boot to clear settings 
+  // short PIN_CLEAR to ground at boot to clear settings
   pinMode(PIN_CLEAR, INPUT_PULLUP);
 #endif
-	  
+
   ENTER(L_DEBUG);
 #ifdef ESP8266
   _gotIpEventHandler = WiFi.onStationModeGotIP(_wifi_connect_callback);
@@ -550,7 +653,7 @@ void wifi_setup()
   _wifiMgr_setup(SETTINGS_RESET);
   _OTAUpdate_setup();
 
-#ifdef ESP8266  
+#ifdef ESP8266
   _disconnectedEventHandler = WiFi.onStationModeDisconnected(_wifi_disconnect_callback);
 #else // ESP32
   WiFi.onEvent(_wifi_disconnect_callback, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
