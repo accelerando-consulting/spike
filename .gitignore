@@ -1,0 +1,7 @@
+core
+*.stl
+*/gerbers
+*/gerbers.zip
+**/*.kicad_pcb-bak
+*.ino.bin
+*.ino.elf
