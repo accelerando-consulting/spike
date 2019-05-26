@@ -98,7 +98,7 @@ module assembly() {
         translate([spike_inset,wall+width/2,0]) cylinder(d=spike_dia, h=spike_sleeve);
 	translate([wall+length/2-sensor_length/2,wall+width-fuzz,wall+sensor_up]) cube([sensor_length,wall+2*fuzz,sensor_height]);
 	translate([0,width+2*wall+sensor_width-8,5*wall]) rotate([-tilt_angle,0,0]) cube([length+2*wall,sensor_width,1.6]);
-	translate([wall+length/2-3,width+2*wall+sensor_width-4,-1]) cube([6,6,8]);
+	translate([wall+length/2-3,width+2*wall+sensor_width-4,-1]) cube([6,6,10]);
     }
 }
 
@@ -110,7 +110,7 @@ module lid() {
 		translate([2*wall+clearance+10,2*wall+clearance+32,0]) clozenge(18,14,6,7);
 	    }
 	    translate([2*wall+clearance+10,2*wall+clearance+32,-wall-fuzz]) clozenge(14,10,6,5);
-	    translate([2*wall+clearance+10,2*wall+clearance+32,wall]) clozenge(10,6,5,3);
+	    translate([2*wall+clearance+10,2*wall+clearance+32,wall]) clozenge(10,8,5,3);
 	}
 	difference() {
 	    translate([0,10,0])
@@ -155,8 +155,8 @@ module grid(rows=2, cols=4, length=95, width=150) {
      }
 }
 
-grid();
-
+//grid();
+unit();
 
     
 
