@@ -9,7 +9,7 @@
 #define DBG Serial
 #endif
 #ifndef DEBUG_LEVEL
-#define DEBUG_LEVEL L_INFO
+#define DEBUG_LEVEL L_NOTICE
 #endif
 
 
@@ -69,7 +69,7 @@ void _udpsend(char *dst, unsigned int port, char *buf, unsigned int len)
     int severity; \
     int offset = 0; \
     time_t now; \
-    struct tm *localtm; \
+    struct tm localtm; \
     switch (l) { \
     case L_ALERT: severity=1; break; \
     case L_NOTICE: severity=5; break; \
@@ -78,9 +78,8 @@ void _udpsend(char *dst, unsigned int port, char *buf, unsigned int len)
     } \
     snprintf(syslogbuf+offset, sizeof(syslogbuf)-offset, "<%d>", (facility<<3)+severity); \
     offset = strlen(syslogbuf); \
-    time(&now); \
-    localtm = localtime(&now); \
-    strftime(syslogbuf+offset, sizeof(syslogbuf)-offset, "%b %e %T ", localtm); \
+    getLocalTime(&localtm); \
+    strftime(syslogbuf+offset, sizeof(syslogbuf)-offset, "%b %e %T ", &localtm); \
     offset = strlen(syslogbuf); \
     /*snprintf(syslogbuf+offset, sizeof(syslogbuf)-offset, "%s ", device_id);*/ \
     snprintf(syslogbuf+offset, sizeof(syslogbuf)-offset, "%s %6s @%s:L%d ", device_id, _level_str(l), __PRETTY_FUNCTION__, (int)__LINE__); \
